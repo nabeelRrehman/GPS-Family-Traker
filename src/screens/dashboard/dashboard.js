@@ -15,6 +15,7 @@ import MarkerImage from '../../../assets/Map-Marker.png'
 import Icons from '../../../assets/person-dummy.jpg'
 const { width, height } = Dimensions.get('window');
 import moment from "moment";
+import { Icon } from 'react-native-elements'
 import Modal from 'react-native-modal'
 import Leave from '../../../assets/leave.png'
 const ASPECT_RATIO = width / height;
@@ -158,47 +159,47 @@ class Home extends React.Component {
         const { uid } = this.state
         const { me, userUid } = this.props;
         // try {
-            let { status } = await Permissions.askAsync(Permissions.LOCATION);
-            if (status !== 'granted') {
-                this.setState({
-                    errorMessage: 'Permission to access location was denied',
-                });
-                console.log("permission not granted ")
+        let { status } = await Permissions.askAsync(Permissions.LOCATION);
+        if (status !== 'granted') {
+            this.setState({
+                errorMessage: 'Permission to access location was denied',
+            });
+            console.log("permission not granted ")
 
-            }
-            this.watchId = navigator.geolocation.watchPosition(
-                (position) => {
-                    console.log(position, 'position watch')
-                    let address = Promise.resolve(Location.reverseGeocodeAsync(position.coords))
+        }
+        this.watchId = navigator.geolocation.watchPosition(
+            (position) => {
+                console.log(position, 'position watch')
+                let address = Promise.resolve(Location.reverseGeocodeAsync(position.coords))
 
-                    address.then((value) => {
-                        let arr = value.map(name => {
-                            var obj = {
-                                direction: {
-                                    country: name.country,
-                                    city: name.city,
-                                    address: name.name,
-                                    latitude: position.coords.latitude,
-                                    longitude: position.coords.longitude,
-                                    time: position.timestamp
-                                },
-                            }
-                            const { addMyData } = this.props.actions
-                            addMyData(obj, userUid)
-                        })
+                address.then((value) => {
+                    let arr = value.map(name => {
+                        var obj = {
+                            direction: {
+                                country: name.country,
+                                city: name.city,
+                                address: name.name,
+                                latitude: position.coords.latitude,
+                                longitude: position.coords.longitude,
+                                time: position.timestamp
+                            },
+                        }
+                        const { addMyData } = this.props.actions
+                        addMyData(obj, userUid)
                     })
-                    this.setState({
-                        position,
-                        currentLocation: { lat: position.coords.latitude, lng: position.coords.longitude },
-                        error: null,
-                        // isLocationModalVisible: false,
-                        get: true
-                    });
-                },
-                (error) => this.setState({ error: error.message }),
-                { enableHighAccuracy: true, timeout: 2000, maximumAge: 0, distanceFilter: 1 },
+                })
+                this.setState({
+                    position,
+                    currentLocation: { lat: position.coords.latitude, lng: position.coords.longitude },
+                    error: null,
+                    // isLocationModalVisible: false,
+                    get: true
+                });
+            },
+            (error) => this.setState({ error: error.message }),
+            { enableHighAccuracy: true, timeout: 2000, maximumAge: 0, distanceFilter: 1 },
 
-            );
+        );
         // } catch (error) {
         //     let status = Location.getProviderStatusAsync()
         //     if (!status.LocationServicesEnabled) {
@@ -236,10 +237,8 @@ class Home extends React.Component {
         console.log(change, 'my chage')
     }
 
-    openJoin() {
-        const { navigate } = this.props.navigation
-
-        navigate('JoinCode')
+    openMenu() {
+        this.props.navigation.openDrawer()
     }
 
     getDirection(item) {
@@ -413,9 +412,10 @@ class Home extends React.Component {
                             paddingVertical: 10,
                             paddingHorizontal: 10,
                         }}>
-                            <Image
-                                style={{ width: 25, height: 25 }}
-                                source={Leave}
+                            <Icon
+                                size={25}
+                                color={'grey'}
+                                name={'message'}
                             />
                         </TouchableOpacity>
                     </View>
@@ -435,16 +435,9 @@ class Home extends React.Component {
         )
     }
 
-    // _handleAppStateChange = (nextAppState) => {
-    //     if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
-    //         console.log('App has come to the foreground!')
-    //         this._getLocationAsync()
-    //     }
-    //     this.setState({ appState: nextAppState });
-    // }
 
     render() {
-        const { get, currentLocation, dropDown, circles, markersAdmin, markersMember, isLocationModalVisible, group, openSetting } = this.state
+        const { get, currentLocation, user, dropDown, circles, markersAdmin, markersMember, isLocationModalVisible, group, openSetting } = this.state
         const items = {
             direction: {
                 latitude: currentLocation.lat,
@@ -452,24 +445,8 @@ class Home extends React.Component {
             }
         }
         return (
-            <Container openJoin={() => this.openJoin()} showDropDown={() => this.showDropDown()} addCircle={() => this.addCircle()} title={group ? group : `Circles(${circles && circles.length ? circles.length : 0})`} rightIcon={true}>
+            <Container openDrawer={() => this.openMenu()} showDropDown={() => this.showDropDown()} addCircle={() => this.addCircle()} title={group ? group : `Circles(${circles && circles.length ? circles.length : 0})`} rightIcon={true}>
                 <View style={{ flex: 1 }}>
-                    {/* {
-                        <Modal
-                            onModalHide={openSetting ? this.openSetting : undefined}
-                            isVisible={isLocationModalVisible}
-                        >
-                            <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
-                                <Text style={styles.btn}
-                                    onPress={() => this.setState({
-                                        isLocationModalVisible: false,
-                                        openSetting: true
-                                    })}
-                                // onPress={() => this.openSetting()}
-                                >Location Turn On</Text>
-                            </View>
-                        </Modal>
-                    } */}
                     {
                         get ?
                             < MapView

@@ -23,12 +23,12 @@ class Container extends React.Component {
     }
 
     goBack() {
-        const { back, goback, openJoin } = this.props
+        const { back, goback, openDrawer } = this.props
 
         if (back) {
             goback()
         } else {
-            openJoin()
+            openDrawer()
         }
 
     }
